@@ -2,6 +2,8 @@ package com.condo.manager.dto
 
 
 import com.condo.manager.parcel.ParcelStatus
+import com.condo.manager.room.Room
+import com.condo.manager.user.User
 import com.condo.manager.user.UserRole
 import java.time.LocalDateTime
 
@@ -22,7 +24,8 @@ data class UserDto(
     val email: String,
     val fullName: String,
     val phone: String?,
-    val userRole: UserRole
+    val userRole: UserRole,
+    val roomAssignments: List<RoomDto> = emptyList()
 )
 
 // Room DTOs
@@ -31,18 +34,52 @@ data class RoomCreationDto(
     val floor: String,
     val roomNumber: String
 )
+fun mapToRoomDto(room: Room,includeUsers:Boolean= true): RoomDto {
+    return RoomDto(
+        id = room.id,
+        roomId = room.roomId,
+        building = room.building,
+        floor = room.floor,
+        roomNumber = room.roomNumber,
+        roomAssignments = if (includeUsers) {
+            room.roomAssignments.map { mapToUserDto(it.user, false) }
+        } else {
+            emptyList()
+        }
 
+    )
+}
+
+fun mapToUserDto(user: User,includeRooms: Boolean= true): UserDto {
+    return UserDto(
+        id = user.id,
+        username = user.username,
+        email = user.email,
+        fullName = user.fullName,
+        phone = user.phone,
+        userRole = user.userRole,
+        roomAssignments = if (includeRooms) {
+            user.roomAssignments.map { mapToRoomDto(it.room, false) }
+        } else {
+            emptyList()
+        }
+
+    )
+}
 data class RoomDto(
     val id: Long,
     val roomId: String,
     val building: String,
     val floor: String,
-    val roomNumber: String
+    val roomNumber: String,
+    val roomAssignments: List<UserDto>,
 )
+
 
 data class RoomAssignmentDto(
     val userId: Long,
-    val roomId: Long
+    // this room id is the secret key that has been produced by the system.
+    val roomCode: String,
 )
 data class RoomCodeDto(
     val roomNumber: String,

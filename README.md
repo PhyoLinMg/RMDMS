@@ -23,6 +23,16 @@ For this implementation, I’ve chosen to focus on just one core feature to deep
 - 👤 **User Management** – Manage user roles and information
 - 📦 **Parcel Management** – Track and handle parcel deliveries for tenants
 
+## Set up for PostgresSQL
+
+This is my docker setup.
+```
+docker run --name postgres-spring -e POSTGRES_PASSWORD=linmaung -e POSTGRES_USER=postgres -e POSTGRES_DB=room_management -p 5432:5432 -d postgres
+docker exec -it postgres-spring psql -U postgres -d room_management
+```
+
+
+
 ## 📬 Postman Collection
 
 You can test the API using the Postman collection provided in this project.

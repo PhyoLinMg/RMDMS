@@ -3,6 +3,7 @@ package com.condo.manager.room
 import com.condo.manager.dto.RoomCodeDto
 import com.condo.manager.dto.RoomCreationDto
 import com.condo.manager.dto.RoomDto
+import com.condo.manager.dto.mapToRoomDto
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
@@ -35,7 +36,8 @@ class RoomService(
             roomId = uniqueRoomId,
             building = roomCreationDto.building,
             floor = roomCreationDto.floor,
-            roomNumber = roomCreationDto.roomNumber
+            roomNumber = roomCreationDto.roomNumber,
+
         )
 
         val savedRoom = roomRepository.save(room)
@@ -53,6 +55,12 @@ class RoomService(
             .orElseThrow { EntityNotFoundException("Room not found with id: $id") }
         return mapToRoomDto(room)
     }
+    fun getRoomByRoomCode(code:String): Room{
+
+        val room = roomRepository.findByRoomId(code)
+            .orElseThrow { EntityNotFoundException("Room not found with code: $code") }
+        return room
+    }
 
     fun getRoomCodes(): List<RoomCodeDto>{
         return roomRepository.findAll().map { RoomCodeDto(it.roomNumber, it.roomId) }
@@ -61,13 +69,5 @@ class RoomService(
         return roomRepository.findAll().map { mapToRoomDto(it) }
     }
 
-    private fun mapToRoomDto(room: Room): RoomDto {
-        return RoomDto(
-            id = room.id,
-            roomId = room.roomId,
-            building = room.building,
-            floor = room.floor,
-            roomNumber = room.roomNumber
-        )
-    }
+
 }

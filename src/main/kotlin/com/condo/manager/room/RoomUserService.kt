@@ -3,6 +3,7 @@ package com.condo.manager.room
 import com.condo.manager.dto.RoomAssignmentDto
 import com.condo.manager.dto.RoomDto
 import com.condo.manager.dto.UserDto
+import com.condo.manager.dto.mapToUserDto
 import com.condo.manager.user.UserRepository
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
@@ -16,14 +17,11 @@ class RoomUserService(
 ) {
 
     @Transactional
-    fun assignUserToRoom(assignmentDto: RoomAssignmentDto): RoomUser {
-        val user = userRepository.findById(assignmentDto.userId)
-            .orElseThrow { EntityNotFoundException("User not found with id: ${assignmentDto.userId}") }
+    fun assignUserToRoom(userId:Long, room: Room): RoomUser {
+        val user = userRepository.findById(userId)
+            .orElseThrow { EntityNotFoundException("User not found with id: $userId") }
 
-        val room = roomRepository.findById(assignmentDto.roomId)
-            .orElseThrow { EntityNotFoundException("Room not found with id: ${assignmentDto.roomId}") }
-
-        // Check if assignment already exists
+        // Check if the assignment already exists
         roomUserRepository.findByUserAndRoom(user, room).ifPresent {
             throw IllegalArgumentException("User is already assigned to this room")
         }
@@ -46,7 +44,8 @@ class RoomUserService(
                 roomId = it.room.roomId,
                 building = it.room.building,
                 floor = it.room.floor,
-                roomNumber = it.room.roomNumber
+                roomNumber = it.room.roomNumber,
+                roomAssignments = it.room.roomAssignments.map { room-> mapToUserDto(room.user) }
             )
         }
     }

@@ -17,11 +17,16 @@ class AuthService(
 ) {
     private val passwordEncoder = BCryptPasswordEncoder()
 
-    fun register(username: String, password: String, role: UserRole): Map<String, String> {
+    fun register(username: String, password: String, role: UserRole, email: String): Map<String, String> {
         if (userRepository.findByUsername(username).getOrNull() != null)
             throw IllegalArgumentException("Username exists")
 
-        val user = User().copy(username = username, userRole = role, password = passwordEncoder.encode(password))
+        val user = User().copy(
+            username = username,
+            userRole = role,
+            email = email,
+            password = passwordEncoder.encode(password),
+        )
 
         val savedUser = userRepository.save(user)
 
@@ -52,7 +57,7 @@ class AuthService(
     private fun generateTokenPair(user: User): Map<String, String> {
         println("generate token pair here")
         val accessTokenNew = jwtService.generateAccessToken(user.username, userRole = user.userRole)
-        val refreshTokenNew = jwtService.generateRefreshToken(user.username, userRole= user.userRole)
+        val refreshTokenNew = jwtService.generateRefreshToken(user.username, userRole = user.userRole)
 
         val existingToken = refreshTokenRepository.findByUser(user)
         val refreshToken = existingToken?.apply {

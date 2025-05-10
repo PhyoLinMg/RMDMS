@@ -8,12 +8,15 @@ import org.springframework.web.bind.annotation.*
 class AuthController(
     private val authService: AuthService
 ) {
-    data class AuthRequest(val username: String, val password: String, val isTenant: Boolean = true)
+    data class AuthRequest(val username: String, val password: String, val isTenant: Boolean = true, val email: String="")
     data class RefreshRequest(val refreshToken: String)
 
     @PostMapping("/register")
     fun register(@RequestBody request: AuthRequest): Map<String, String> = authService.register(
-        request.username, request.password, role = if (request.isTenant) UserRole.TENANT else UserRole.OWNER
+        request.username,
+        request.password,
+        role = if (request.isTenant) UserRole.TENANT else UserRole.OWNER,
+        email = request.email,
     )
 
     @PostMapping("/login")

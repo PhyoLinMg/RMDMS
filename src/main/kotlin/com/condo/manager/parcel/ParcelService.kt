@@ -5,6 +5,7 @@ import com.condo.manager.dto.ParcelDto
 import com.condo.manager.dto.ParcelStatusUpdateDto
 import com.condo.manager.dto.RoomDto
 import com.condo.manager.dto.UserDto
+import com.condo.manager.dto.mapToUserDto
 import com.condo.manager.notification.NotificationService
 import com.condo.manager.room.RoomRepository
 import com.condo.manager.user.UserRepository
@@ -131,7 +132,8 @@ class ParcelService(
                 roomId = parcel.room.roomId,
                 building = parcel.room.building,
                 floor = parcel.room.floor,
-                roomNumber = parcel.room.roomNumber
+                roomNumber = parcel.room.roomNumber,
+                roomAssignments = parcel.room.roomAssignments.map { mapToUserDto(it.user) }
             ),
             recipientDetails = UserDto(
                 id = parcel.recipient.id,

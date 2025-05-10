@@ -3,6 +3,7 @@ package com.condo.manager.user
 
 import com.condo.manager.dto.UserDto
 import com.condo.manager.dto.UserRegistrationDto
+import com.condo.manager.dto.mapToRoomDto
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -60,7 +61,8 @@ class UserService(
             email = user.email,
             fullName = user.fullName,
             phone = user.phone,
-            userRole = user.userRole
+            userRole = user.userRole,
+            roomAssignments = user.roomAssignments.map { mapToRoomDto(it.room) }
         )
     }
 

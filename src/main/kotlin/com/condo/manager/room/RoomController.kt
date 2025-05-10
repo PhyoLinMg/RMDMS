@@ -6,7 +6,7 @@ import com.condo.manager.dto.RoomCodeDto
 import com.condo.manager.dto.RoomCreationDto
 import com.condo.manager.dto.RoomDto
 import com.condo.manager.dto.UserDto
-import org.hibernate.internal.CoreLogging.logger
+import com.condo.manager.dto.mapToUserDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -49,9 +49,9 @@ class RoomController(
     }
 
     @PostMapping("/assign")
-    @PreAuthorize("hasRole('MANAGER')")
-    fun assignUserToRoom(@Valid @RequestBody assignmentDto: RoomAssignmentDto): ResponseEntity<RoomUser> {
-        val roomUser = roomUserService.assignUserToRoom(assignmentDto)
+    fun assignUserToRoom(@Valid @RequestBody assignmentDto: RoomAssignmentDto): ResponseEntity<RoomDto> {
+        val room = roomService.getRoomByRoomCode(assignmentDto.roomCode)
+        val roomUser = roomUserService.assignUserToRoom(userId= assignmentDto.userId, room = room).mapToApi()
         return ResponseEntity(roomUser, HttpStatus.CREATED)
     }
 
@@ -60,6 +60,8 @@ class RoomController(
         val rooms = roomUserService.getUserRooms(userId)
         return ResponseEntity(rooms, HttpStatus.OK)
     }
+
+
 
     @GetMapping("/codes")
     @PreAuthorize("hasRole('MANAGER')")
@@ -72,5 +74,16 @@ class RoomController(
     fun getRoomUsers(@PathVariable roomId: Long): ResponseEntity<List<UserDto>> {
         val users = roomUserService.getRoomUsers(roomId)
         return ResponseEntity(users, HttpStatus.OK)
+    }
+
+    fun RoomUser.mapToApi(): RoomDto {
+        return RoomDto(
+            id = this.id,
+            roomId = this.room.roomId,
+            building = this.room.building,
+            floor = this.room.floor,
+            roomNumber = this.room.roomNumber,
+            roomAssignments = this.room.roomAssignments.map { room-> mapToUserDto(room.user) }
+        )
     }
 }
