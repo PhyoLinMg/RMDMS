@@ -2,6 +2,8 @@ package com.condo.manager.notification
 
 
 import com.condo.manager.dto.NotificationDto
+import com.condo.manager.user.User
+import com.condo.manager.user.UserService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -12,24 +14,24 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/notifications")
-class NotificationController(private val notificationService: NotificationService) {
+class NotificationController(private val notificationService: NotificationService,private val userService: UserService) {
 
     @GetMapping
     fun getMyNotifications(
-        @AuthenticationPrincipal userDetails: UserDetails,
-        pageable: Pageable
+        @RequestParam(required = false) page: Int = 0,
+        @AuthenticationPrincipal(errorOnInvalidType = true) userDetails: User
     ): ResponseEntity<Page<NotificationDto>> {
-        val userId = getUserIdFromUserDetails(userDetails)
-        val notifications = notificationService.getUserNotifications(userId, pageable)
+        val pageable = Pageable.ofSize(5).withPage(page)
+        val notifications = notificationService.getUserNotifications(userDetails.id, pageable)
         return ResponseEntity(notifications, HttpStatus.OK)
     }
 
     @GetMapping("/unread-count")
     fun getUnreadNotificationsCount(
-        @AuthenticationPrincipal userDetails: UserDetails
+        @AuthenticationPrincipal userDetails: User
     ): ResponseEntity<Long> {
-        val userId = getUserIdFromUserDetails(userDetails)
-        val count = notificationService.getUnreadNotificationsCount(userId)
+
+        val count = notificationService.getUnreadNotificationsCount(userDetails.id)
         return ResponseEntity(count, HttpStatus.OK)
     }
 
@@ -41,11 +43,4 @@ class NotificationController(private val notificationService: NotificationServic
         return ResponseEntity(notification, HttpStatus.OK)
     }
 
-    // Helper method to extract user ID from UserDetails
-    // In a real application, you would implement this based on your authentication mechanism
-    private fun getUserIdFromUserDetails(userDetails: UserDetails): Long {
-        // This is a placeholder. In a real app, you would extract the user ID
-        // from your custom implementation of UserDetails
-        return 1L // Example user ID
-    }
 }

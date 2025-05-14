@@ -5,6 +5,7 @@ import com.condo.manager.parcel.ParcelStatus
 import com.condo.manager.room.Room
 import com.condo.manager.user.User
 import com.condo.manager.user.UserRole
+import jakarta.validation.constraints.NotEmpty
 import java.time.LocalDateTime
 
 // User DTOs

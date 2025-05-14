@@ -1,5 +1,6 @@
 package com.condo.manager.auth
 
+import com.condo.manager.error.UnauthorizedException
 import com.condo.manager.user.UserRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -9,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.filter.OncePerRequestFilter
 import kotlin.jvm.optionals.getOrNull
 
@@ -17,7 +19,6 @@ class JwtAuthFilter(
     private val jwtService: JwtService,
     private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -41,6 +42,7 @@ class JwtAuthFilter(
                     SecurityContextHolder.getContext().authentication = auth
                 }
             }
+            //else throw UnauthorizedException("Invalid token")
         }
 
         filterChain.doFilter(request, response)

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
@@ -25,15 +26,10 @@ class ParcelController(private val parcelService: ParcelService, private val use
     @PreAuthorize("hasRole('MANAGER')")
     fun createParcel(
         @Valid @RequestBody parcelCreationDto: ParcelCreationDto,
+        @AuthenticationPrincipal(errorOnInvalidType = true) userDetails: User
     ): ResponseEntity<ParcelDto> {
-        // In a real application, you would extract the user ID from userDetails
-        // For now, we'll assume there's a method to get the ID
         return try {
-            val authentication = SecurityContextHolder.getContext().authentication
-
-            val managerId = getUserIdFromUserDetails((authentication?.principal as User?)?.username ?: "")
-
-            val createdParcel = parcelService.createParcel(parcelCreationDto, managerId)
+            val createdParcel = parcelService.createParcel(parcelCreationDto, userDetails.id)
 
             ResponseEntity(createdParcel, HttpStatus.CREATED)
         } catch (e: Exception) {
@@ -45,11 +41,10 @@ class ParcelController(private val parcelService: ParcelService, private val use
     @PreAuthorize("hasRole('MANAGER')")
     fun updateParcelStatus(
         @Valid @RequestBody statusUpdateDto: ParcelStatusUpdateDto,
+        @AuthenticationPrincipal(errorOnInvalidType = true) userDetails: User
     ): ResponseEntity<ParcelDto> {
-        val authentication = SecurityContextHolder.getContext().authentication
 
-        val managerId = getUserIdFromUserDetails((authentication?.principal as User?)?.username ?: "")
-        val updatedParcel = parcelService.updateParcelStatus(statusUpdateDto, managerId)
+        val updatedParcel = parcelService.updateParcelStatus(statusUpdateDto, userDetails.id)
         return ResponseEntity(updatedParcel, HttpStatus.OK)
     }
 
@@ -98,18 +93,12 @@ class ParcelController(private val parcelService: ParcelService, private val use
     @GetMapping("/mine")
     fun getMyParcels(
         @RequestParam(required = false) page: Int = 0,
+        @AuthenticationPrincipal(errorOnInvalidType = true) user: User
     ): ResponseEntity<Page<ParcelDto>> {
-        val authentication = SecurityContextHolder.getContext().authentication
+
         val pageable = PageRequest.of(page,5)
-        val userId = getUserIdFromUserDetails((authentication?.principal as User?)?.username ?: "")
-        val parcels = parcelService.getParcelsByUser(userId, pageable)
+
+        val parcels = parcelService.getParcelsByUser(user.id, pageable)
         return ResponseEntity(parcels, HttpStatus.OK)
-    }
-
-
-    // In a real application, you would implement this based on your authentication mechanism
-    private fun getUserIdFromUserDetails(userName: String): Long {
-        val user = userService.findByUsername(userName)
-        return user.id
     }
 }
