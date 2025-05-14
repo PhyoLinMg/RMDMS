@@ -52,7 +52,12 @@ data class User(
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     val updatedAt: LocalDateTime = LocalDateTime.now()
-)
+) {
+    override fun toString(): String {
+        return "User(id=$id, username='$username', userRole=$userRole)"
+        // Don't include roomAssignments in toString()
+    }
+}
 
 enum class UserRole {
     TENANT,

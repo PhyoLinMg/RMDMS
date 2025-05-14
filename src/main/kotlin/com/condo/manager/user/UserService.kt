@@ -40,6 +40,16 @@ class UserService(
         val savedUser = userRepository.save(user)
         return mapToUserDto(savedUser)
     }
+    fun findByUsername(username: String): UserDto {
+        val user = userRepository.findByUsername(username)
+            .orElseThrow { EntityNotFoundException("User not found with username: $username") }
+        return mapToUserDto(user)
+    }
+    fun findByEmail(email: String): UserDto {
+        val user = userRepository.findByEmail(email)
+            .orElseThrow { EntityNotFoundException("User not found with email: $email") }
+        return mapToUserDto(user)
+    }
 
     fun findAll(): List<UserDto> {
         return userRepository.findAll().map { mapToUserDto(it) }
@@ -62,13 +72,16 @@ class UserService(
             fullName = user.fullName,
             phone = user.phone,
             userRole = user.userRole,
-            roomAssignments = user.roomAssignments.map { mapToRoomDto(it.room) }
+            //roomAssignments = user.roomAssignments.map { mapToRoomDto(it.room) }
         )
     }
+
+
 
     override fun loadUserByUsername(username: String?): UserDetails? {
         val user= userRepository.findByUsername(username!!)
             .orElseThrow { EntityNotFoundException("User not found with username: $username") }
+
         return org.springframework.security.core.userdetails.User(
             user.username,
             user.password,

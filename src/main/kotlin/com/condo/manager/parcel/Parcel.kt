@@ -37,7 +37,7 @@ data class Parcel(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var status: ParcelStatus = ParcelStatus.PENDING,
+    var status: ParcelStatus = ParcelStatus.DELIVERED,
 
     @Column(name = "delivered_at")
     var deliveredAt: LocalDateTime? = null,
@@ -58,7 +58,7 @@ data class Parcel(
 )
 
 enum class ParcelStatus {
-    PENDING,
     DELIVERED,
     COLLECTED
 }
+

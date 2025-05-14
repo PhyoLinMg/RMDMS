@@ -47,7 +47,6 @@ class ParcelService(
             trackingNumber = parcelCreationDto.trackingNumber,
             carrier = parcelCreationDto.carrier,
             description = parcelCreationDto.description,
-            status = ParcelStatus.PENDING
         )
 
         val savedParcel = parcelRepository.save(parcel)
@@ -75,23 +74,21 @@ class ParcelService(
         }
 
         val oldStatus = parcel.status
-        parcel.status = statusUpdateDto.status
+        parcel.status = ParcelStatus.valueOf(statusUpdateDto.status)
 
         // Update timestamps based on status
-        when (statusUpdateDto.status) {
+        when (ParcelStatus.valueOf(statusUpdateDto.status)) {
             ParcelStatus.DELIVERED -> parcel.deliveredAt = LocalDateTime.now()
             ParcelStatus.COLLECTED -> parcel.collectedAt = LocalDateTime.now()
-            else -> {}
         }
 
         val updatedParcel = parcelRepository.save(parcel)
 
         // Create a notification for the recipient about a status change
-        if (oldStatus != statusUpdateDto.status) {
-            val message = when (statusUpdateDto.status) {
+        if (oldStatus != ParcelStatus.valueOf(statusUpdateDto.status)) {
+            val message = when (ParcelStatus.valueOf(statusUpdateDto.status)) {
                 ParcelStatus.DELIVERED -> "Your parcel has been delivered to your condo"
                 ParcelStatus.COLLECTED -> "Your parcel has been marked as collected"
-                ParcelStatus.PENDING -> "Your parcel status has been changed to pending"
             }
 
             notificationService.createNotification(
@@ -102,6 +99,10 @@ class ParcelService(
         }
 
         return mapToParcelDto(updatedParcel)
+    }
+
+    fun getAllParcels(pageable: Pageable): Page<ParcelDto> {
+        return parcelRepository.findAll(pageable).map { mapToParcelDto(it) }
     }
 
     fun getParcelsByRoom(roomId: Long, pageable: Pageable): Page<ParcelDto> {
@@ -133,7 +134,7 @@ class ParcelService(
                 building = parcel.room.building,
                 floor = parcel.room.floor,
                 roomNumber = parcel.room.roomNumber,
-                roomAssignments = parcel.room.roomAssignments.map { mapToUserDto(it.user) }
+                //roomAssignments = parcel.room.roomAssignments.map { mapToUserDto(it.user, includeRooms = false) }
             ),
             recipientDetails = UserDto(
                 id = parcel.recipient.id,

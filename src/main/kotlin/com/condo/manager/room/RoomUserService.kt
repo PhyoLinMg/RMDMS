@@ -45,7 +45,7 @@ class RoomUserService(
                 building = it.room.building,
                 floor = it.room.floor,
                 roomNumber = it.room.roomNumber,
-                roomAssignments = it.room.roomAssignments.map { room-> mapToUserDto(room.user) }
+                //roomAssignments = it.room.roomAssignments.map { room-> mapToUserDto(room.user) }
             )
         }
     }

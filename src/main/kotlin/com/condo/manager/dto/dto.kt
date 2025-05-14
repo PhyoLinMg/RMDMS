@@ -25,7 +25,7 @@ data class UserDto(
     val fullName: String,
     val phone: String?,
     val userRole: UserRole,
-    val roomAssignments: List<RoomDto> = emptyList()
+    //val roomAssignments: List<RoomDto> = emptyList()
 )
 
 // Room DTOs
@@ -41,11 +41,11 @@ fun mapToRoomDto(room: Room,includeUsers:Boolean= true): RoomDto {
         building = room.building,
         floor = room.floor,
         roomNumber = room.roomNumber,
-        roomAssignments = if (includeUsers) {
-            room.roomAssignments.map { mapToUserDto(it.user, false) }
-        } else {
-            emptyList()
-        }
+//        roomAssignments = if (includeUsers) {
+//            room.roomAssignments.map { mapToUserDto(it.user, false) }
+//        } else {
+//            emptyList()
+//        }
 
     )
 }
@@ -58,11 +58,11 @@ fun mapToUserDto(user: User,includeRooms: Boolean= true): UserDto {
         fullName = user.fullName,
         phone = user.phone,
         userRole = user.userRole,
-        roomAssignments = if (includeRooms) {
-            user.roomAssignments.map { mapToRoomDto(it.room, false) }
-        } else {
-            emptyList()
-        }
+//        roomAssignments = if (includeRooms) {
+//            user.roomAssignments.map { mapToRoomDto(it.room, false) }
+//        } else {
+//            emptyList()
+//        }
 
     )
 }
@@ -72,7 +72,7 @@ data class RoomDto(
     val building: String,
     val floor: String,
     val roomNumber: String,
-    val roomAssignments: List<UserDto>,
+    //val roomAssignments: List<UserDto>,
 )
 
 
@@ -111,7 +111,7 @@ data class ParcelDto(
 
 data class ParcelStatusUpdateDto(
     val id: Long,
-    val status: ParcelStatus
+    val status: String
 )
 
 // Notification DTOs

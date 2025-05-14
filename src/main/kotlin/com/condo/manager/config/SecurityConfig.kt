@@ -25,12 +25,15 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers("/auth/**", "/api/users/**").permitAll()
-                    .requestMatchers("/api/rooms/**").authenticated()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
             .userDetailsService(userDetailService)
 
         return http.build()
+    }
+    @Bean
+    fun userDetailService(): UserDetailsService {
+        return userDetailService
     }
 }

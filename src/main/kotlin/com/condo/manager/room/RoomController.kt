@@ -83,7 +83,7 @@ class RoomController(
             building = this.room.building,
             floor = this.room.floor,
             roomNumber = this.room.roomNumber,
-            roomAssignments = this.room.roomAssignments.map { room-> mapToUserDto(room.user) }
+            //roomAssignments = this.room.roomAssignments.map { room-> mapToUserDto(room.user) }
         )
     }
 }

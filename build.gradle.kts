@@ -35,6 +35,10 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
+	implementation("org.slf4j:slf4j-api")
+	implementation("ch.qos.logback:logback-classic")
+
+
 
 }
 
