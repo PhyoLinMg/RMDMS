@@ -2,12 +2,14 @@ package com.condo.manager
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 
 @SpringBootApplication
 @EnableMethodSecurity
 @EnableWebSecurity
+@EnableJpaRepositories
 class ManagerApplication
 
 fun main(args: Array<String>) {

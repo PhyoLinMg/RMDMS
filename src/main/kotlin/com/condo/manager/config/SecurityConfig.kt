@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
 import java.awt.PageAttributes
 
 @Configuration
@@ -26,6 +27,16 @@ class SecurityConfig(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
+            .cors {
+                it.configurationSource {
+                    val configuration = CorsConfiguration()
+                    configuration.allowedOrigins = listOf("http://localhost:3000")
+                    configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                    configuration.allowedHeaders = listOf("*")
+                    configuration.allowCredentials = true
+                    configuration
+                }
+            }
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {

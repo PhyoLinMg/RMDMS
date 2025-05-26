@@ -1,23 +1,23 @@
 package com.condo.manager.auth
 
-import com.condo.manager.error.UnauthorizedException
+
 import com.condo.manager.user.UserRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.filter.OncePerRequestFilter
 import kotlin.jvm.optionals.getOrNull
 
 @Component
 class JwtAuthFilter(
     private val jwtService: JwtService,
-    private val userRepository: UserRepository,
+    @Lazy private val userRepository: UserRepository,
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,

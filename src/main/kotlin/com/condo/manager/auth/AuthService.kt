@@ -48,6 +48,7 @@ class AuthService(
         val token = refreshTokenRepository.findByToken(refreshToken)
             ?: throw IllegalArgumentException("Invalid refresh token")
 
+        println("Refresh Token")
         if (token.expiryDate.before(Date()))
             throw IllegalArgumentException("Refresh token expired")
 
