@@ -9,7 +9,7 @@ import javax.crypto.SecretKey
 @Service
 class JwtService {
     private val secretKey: SecretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256)
-    private val accessTokenExpiration = 1000 * 60 * 1  // 15 minutes
+    private val accessTokenExpiration = 1000 * 60 * 15  // 15 minutes
     private val refreshTokenExpiration = 1000 * 60 * 60 * 24 * 7  // 7 days
 
     fun generateAccessToken(userId: String,userRole: UserRole): String =

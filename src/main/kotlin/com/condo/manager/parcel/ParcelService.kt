@@ -1,17 +1,19 @@
 package com.condo.manager.parcel
 
 import com.condo.manager.dto.ParcelCreationDto
-import com.condo.manager.dto.ParcelDto
+import com.condo.manager.dto.ParcelResponseDTO
 import com.condo.manager.dto.ParcelStatusUpdateDto
 import com.condo.manager.dto.RoomDto
 import com.condo.manager.dto.UserDto
-import com.condo.manager.dto.mapToUserDto
+
 import com.condo.manager.notification.NotificationService
 import com.condo.manager.room.RoomRepository
 import com.condo.manager.user.UserRepository
 import com.condo.manager.user.UserRole
+
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -26,7 +28,7 @@ class ParcelService(
 ) {
 
     @Transactional
-    fun createParcel(parcelCreationDto: ParcelCreationDto, managerId: Long): ParcelDto {
+    fun createParcel(parcelCreationDto: ParcelCreationDto, managerId: Long): ParcelResponseDTO {
         val room = roomRepository.findById(parcelCreationDto.roomId)
             .orElseThrow { EntityNotFoundException("Room not found with id: ${parcelCreationDto.roomId}") }
 
@@ -58,11 +60,11 @@ class ParcelService(
             "A new parcel has been registered for you"
         )
 
-        return mapToParcelDto(savedParcel)
+        return ParcelResponseDTO.from(savedParcel)
     }
 
     @Transactional
-    fun updateParcelStatus(statusUpdateDto: ParcelStatusUpdateDto, managerId: Long): ParcelDto {
+    fun updateParcelStatus(statusUpdateDto: ParcelStatusUpdateDto, managerId: Long): ParcelResponseDTO {
         val parcel = parcelRepository.findById(statusUpdateDto.id)
             .orElseThrow { EntityNotFoundException("Parcel not found with id: ${statusUpdateDto.id}") }
 
@@ -98,67 +100,42 @@ class ParcelService(
             )
         }
 
-        return mapToParcelDto(updatedParcel)
+        return ParcelResponseDTO.from(updatedParcel)
     }
 
-    fun getAllParcels(pageable: Pageable): Page<ParcelDto> {
-        return parcelRepository.findAll(pageable).map { mapToParcelDto(it) }
+    fun getAllParcels(pageable: Pageable): Page<ParcelResponseDTO> {
+        return parcelRepository.findAll(pageable).map { ParcelResponseDTO.from(it) }
     }
 
-    fun getParcelsByRoom(roomId: Long, pageable: Pageable): Page<ParcelDto> {
+    fun getParcelsByRoom(roomId: Long, pageable: Pageable): Page<ParcelResponseDTO> {
         val room = roomRepository.findById(roomId)
             .orElseThrow { EntityNotFoundException("Room not found with id: $roomId") }
 
-        return parcelRepository.findByRoom(room, pageable).map { mapToParcelDto(it) }
+        return parcelRepository.findByRoom(room, pageable).map { ParcelResponseDTO.from(it) }
     }
 
-    fun getParcelsByUser(userId: Long, pageable: Pageable): Page<ParcelDto> {
+    fun getParcelsByUser(userId: Long, pageable: Pageable): Page<ParcelResponseDTO> {
         val user = userRepository.findById(userId)
             .orElseThrow { EntityNotFoundException("User not found with id: $userId") }
 
-        return parcelRepository.findByRecipient(user, pageable).map { mapToParcelDto(it) }
+        return parcelRepository.findByRecipient(user, pageable).map { ParcelResponseDTO.from(it) }
     }
 
-    fun getParcelById(id: Long): ParcelDto {
+    fun getParcelById(id: Long): ParcelResponseDTO {
         val parcel = parcelRepository.findById(id)
             .orElseThrow { EntityNotFoundException("Parcel not found with id: $id") }
-        return mapToParcelDto(parcel)
+        return ParcelResponseDTO.from(parcel)
     }
 
-    private fun mapToParcelDto(parcel: Parcel): ParcelDto {
-        return ParcelDto(
-            id = parcel.id,
-            roomDetails = RoomDto(
-                id = parcel.room.id,
-                roomId = parcel.room.roomId,
-                building = parcel.room.building,
-                floor = parcel.room.floor,
-                roomNumber = parcel.room.roomNumber,
-                //roomAssignments = parcel.room.roomAssignments.map { mapToUserDto(it.user, includeRooms = false) }
-            ),
-            recipientDetails = UserDto(
-                id = parcel.recipient.id,
-                username = parcel.recipient.username,
-                email = parcel.recipient.email,
-                fullName = parcel.recipient.fullName,
-                phone = parcel.recipient.phone,
-                userRole = parcel.manager.userRole
-            ),
-            managerDetails = UserDto(
-                id = parcel.manager.id,
-                username = parcel.manager.username,
-                email = parcel.manager.email,
-                fullName = parcel.manager.fullName,
-                phone = parcel.manager.phone,
-                userRole = parcel.manager.userRole
-            ),
-            trackingNumber = parcel.trackingNumber,
-            carrier = parcel.carrier,
-            description = parcel.description,
-            status = parcel.status,
-            deliveredAt = parcel.deliveredAt,
-            collectedAt = parcel.collectedAt,
-            createdAt = parcel.createdAt
-        )
+
+    @Cacheable(value = ["parcelsByRoom"], key = "#roomNumber + '_' + #pageable.pageNumber + '_' + #pageable.pageSize")
+    fun findParcelsByRoomNumber(
+        roomNumber: String,
+        pageable: Pageable
+    ): Page<ParcelResponseDTO> {
+        return parcelRepository
+            .findParcelsByRoomNumber(roomNumber, pageable)
+            .map { ParcelResponseDTO.from(it) }
     }
+
 }

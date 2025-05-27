@@ -1,7 +1,7 @@
 package com.condo.manager.parcel
 
 import com.condo.manager.dto.ParcelCreationDto
-import com.condo.manager.dto.ParcelDto
+import com.condo.manager.dto.ParcelResponseDTO
 import com.condo.manager.dto.ParcelStatusUpdateDto
 import com.condo.manager.user.User
 import com.condo.manager.user.UserService
@@ -14,20 +14,20 @@ import org.springframework.web.bind.annotation.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.context.SecurityContextHolder
 
 @RestController
 @RequestMapping("/api/parcels")
 class ParcelController(private val parcelService: ParcelService, private val userService: UserService) {
-    private val logger: Logger = LoggerFactory.getLogger(ParcelController::class.java)
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
     fun createParcel(
         @Valid @RequestBody parcelCreationDto: ParcelCreationDto,
         @AuthenticationPrincipal(errorOnInvalidType = true) userDetails: User
-    ): ResponseEntity<ParcelDto> {
+    ): ResponseEntity<ParcelResponseDTO> {
         return try {
             val createdParcel = parcelService.createParcel(parcelCreationDto, userDetails.id)
 
@@ -42,7 +42,7 @@ class ParcelController(private val parcelService: ParcelService, private val use
     fun updateParcelStatus(
         @Valid @RequestBody statusUpdateDto: ParcelStatusUpdateDto,
         @AuthenticationPrincipal(errorOnInvalidType = true) userDetails: User
-    ): ResponseEntity<ParcelDto> {
+    ): ResponseEntity<ParcelResponseDTO> {
 
         val updatedParcel = parcelService.updateParcelStatus(statusUpdateDto, userDetails.id)
         return ResponseEntity(updatedParcel, HttpStatus.OK)
@@ -53,7 +53,7 @@ class ParcelController(private val parcelService: ParcelService, private val use
     fun getAllParcelsWithRoomId(
         @RequestParam(required = false) page: Int = 0,
         @RequestParam roomId: Long
-    ): ResponseEntity<Page<ParcelDto>> {
+    ): ResponseEntity<Page<ParcelResponseDTO>> {
         // This would typically have filtering logic
         // For this example, we'll just return parcels by room
         val pageable = PageRequest.of(page, 5)
@@ -66,14 +66,14 @@ class ParcelController(private val parcelService: ParcelService, private val use
     @PreAuthorize("hasRole('MANAGER')")
     fun getAllParcels(
         @RequestParam(required = false) page: Int = 0,
-    ): ResponseEntity<Page<ParcelDto>> {
+    ): ResponseEntity<Page<ParcelResponseDTO>> {
         val pageable= PageRequest.of(page, 5)
         val parcels = parcelService.getAllParcels(pageable)
         return ResponseEntity(parcels, HttpStatus.OK)
     }
 
     @GetMapping("/{id}")
-    fun getParcelById(@PathVariable id: Long): ResponseEntity<ParcelDto> {
+    fun getParcelById(@PathVariable id: Long): ResponseEntity<ParcelResponseDTO> {
         val parcel = parcelService.getParcelById(id)
         return ResponseEntity(parcel, HttpStatus.OK)
 
@@ -84,7 +84,7 @@ class ParcelController(private val parcelService: ParcelService, private val use
     fun getParcelsByUser(
         @RequestParam userId:Long,
         @RequestParam(required = false) page: Int = 0,
-    ): ResponseEntity<Page<ParcelDto>> {
+    ): ResponseEntity<Page<ParcelResponseDTO>> {
         val pageable = PageRequest.of(page, 5)
         val parcels = parcelService.getParcelsByUser(userId, pageable)
         return ResponseEntity(parcels, HttpStatus.OK)
@@ -94,11 +94,28 @@ class ParcelController(private val parcelService: ParcelService, private val use
     fun getMyParcels(
         @RequestParam(required = false) page: Int = 0,
         @AuthenticationPrincipal(errorOnInvalidType = true) user: User
-    ): ResponseEntity<Page<ParcelDto>> {
+    ): ResponseEntity<Page<ParcelResponseDTO>> {
 
         val pageable = PageRequest.of(page,5)
 
         val parcels = parcelService.getParcelsByUser(user.id, pageable)
         return ResponseEntity(parcels, HttpStatus.OK)
     }
+
+    @GetMapping("/search")
+    fun searchParcelsByRoom(
+        @RequestParam roomNumber: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "5") size: Int,
+    ): ResponseEntity<Page<ParcelResponseDTO>> {
+        val pageable = PageRequest.of(
+            page,
+            size
+        )
+
+        return ResponseEntity.ok(
+            parcelService.findParcelsByRoomNumber(roomNumber, pageable)
+        )
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.condo.manager.dto
 
 
+import com.condo.manager.parcel.Parcel
 import com.condo.manager.parcel.ParcelStatus
 import com.condo.manager.room.Room
 import com.condo.manager.user.User
@@ -96,20 +97,6 @@ data class ParcelCreationDto(
     val description: String?
 )
 
-data class ParcelDto(
-    val id: Long,
-    val roomDetails: RoomDto,
-    val recipientDetails: UserDto,
-    val managerDetails: UserDto,
-    val trackingNumber: String?,
-    val carrier: String?,
-    val description: String?,
-    val status: ParcelStatus,
-    val deliveredAt: LocalDateTime?,
-    val collectedAt: LocalDateTime?,
-    val createdAt: LocalDateTime
-)
-
 data class ParcelStatusUpdateDto(
     val id: Long,
     val status: String
@@ -123,3 +110,31 @@ data class NotificationDto(
     val isRead: Boolean,
     val createdAt: LocalDateTime
 )
+
+data class ParcelResponseDTO(
+    val id: Long,
+    val trackingNumber: String?,
+    val carrier: String?,
+    val status: ParcelStatus,
+    val description: String?,
+    val deliveredAt: LocalDateTime?,
+    val collectedAt: LocalDateTime?,
+    val roomNumber: String,
+    val recipientName: String,
+    val managerName: String
+) {
+    companion object {
+        fun from(parcel: Parcel) = ParcelResponseDTO(
+            id = parcel.id,
+            trackingNumber = parcel.trackingNumber,
+            carrier = parcel.carrier,
+            status = parcel.status,
+            description = parcel.description,
+            deliveredAt = parcel.deliveredAt,
+            collectedAt = parcel.collectedAt,
+            roomNumber = parcel.room.roomNumber,
+            recipientName = parcel.recipient.fullName,
+            managerName = parcel.manager.fullName,
+        )
+    }
+}
