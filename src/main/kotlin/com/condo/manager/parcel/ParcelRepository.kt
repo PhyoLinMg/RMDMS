@@ -31,6 +31,7 @@ interface ParcelRepository : JpaRepository<Parcel, Long> {
         JOIN FETCH p.manager m 
         JOIN FETCH p.recipient rec 
         WHERE r.roomNumber = :roomNumber
+        AND p.status = 'DELIVERED'
     """)
     @QueryHints(value = [
         QueryHint(name = AvailableHints.HINT_CACHEABLE, value = "true")

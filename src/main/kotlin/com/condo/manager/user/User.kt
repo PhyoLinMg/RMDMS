@@ -62,5 +62,12 @@ data class User(
 enum class UserRole {
     TENANT,
     OWNER,
-    MANAGER
+    MANAGER;
+
+    companion object {
+        fun fromString(value: String): UserRole {
+            return valueOf(value.uppercase())
+        }
+        fun String(): String = this.toString().lowercase()
+    }
 }

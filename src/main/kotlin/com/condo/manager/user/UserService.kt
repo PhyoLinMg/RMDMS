@@ -1,9 +1,6 @@
 package com.condo.manager.user
-
-
 import com.condo.manager.dto.UserDto
 import com.condo.manager.dto.UserRegistrationDto
-import com.condo.manager.dto.mapToRoomDto
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -45,12 +42,15 @@ class UserService(
             .orElseThrow { EntityNotFoundException("User not found with username: $username") }
         return mapToUserDto(user)
     }
+
     fun findByEmail(email: String): UserDto {
         val user = userRepository.findByEmail(email)
             .orElseThrow { EntityNotFoundException("User not found with email: $email") }
         return mapToUserDto(user)
     }
-
+    fun findUserByRole(role: String): List<UserDto>{
+        return userRepository.findByUserRole(UserRole.fromString(role)).map { mapToUserDto(it) }
+    }
     fun findAll(): List<UserDto> {
         return userRepository.findAll().map { mapToUserDto(it) }
     }
@@ -75,8 +75,6 @@ class UserService(
             //roomAssignments = user.roomAssignments.map { mapToRoomDto(it.room) }
         )
     }
-
-
 
     override fun loadUserByUsername(username: String?): UserDetails? {
         val user= userRepository.findByUsername(username!!)

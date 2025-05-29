@@ -2,7 +2,6 @@ package com.condo.manager.user
 
 import com.condo.manager.dto.UserDto
 import com.condo.manager.dto.UserRegistrationDto
-import com.condo.manager.room.Room
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -16,6 +15,9 @@ class UserController(
 
     @GetMapping("/all")
     fun getAllUser(): List<UserDto> = userService.findAll()
+
+    @GetMapping("/all/roles")
+    fun getUserByRole(@RequestParam role: String): List<UserDto> = userService.findUserByRole(role)
 
     @DeleteMapping("/all")
     fun deleteAllUser(){
